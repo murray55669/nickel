@@ -16,7 +16,7 @@ import static org.lwjgl.system.MemoryUtil.*;
 /**
  * Created by Murray on 21/07/2017
  */
-public class Main {
+public class Renderer {
 
     // The window handle
     private long window;
@@ -51,7 +51,7 @@ public class Main {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(300, 300, "Hello nickel.World!", NULL, NULL);
+        window = glfwCreateWindow(300, 300, "Nickel", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -114,7 +114,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        new Main().run();
+        new Renderer().run();
     }
 
 }

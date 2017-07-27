@@ -64,11 +64,25 @@ public class Server {
         Thread t0 = new Thread(manageConnectionsTask);
         t0.start();
 
-        AbstractTask sendDataTask = getSendDataTask();
-        Thread t1 = new Thread(sendDataTask);
+        AbstractTask handleIncomingDataTask = getHandleIncomingDataTask();
+        Thread t1 = new Thread(handleIncomingDataTask);
         t1.start();
 
-        AbstractTask consoleInputTask = getConsoleInputTask(manageConnectionsTask, sendDataTask);
+        // TODO currently this is just the console reader task
+//        AbstractTask handleOutgoingDataTask = getHandleOutgoingDataTask();
+//        Thread t2 = new Thread(handleOutgoingDataTask);
+//        t2.start();
+
+        AbstractTask sendDataTask = getSendDataTask();
+        Thread t3 = new Thread(sendDataTask);
+        t3.start();
+
+        AbstractTask consoleInputTask = getConsoleInputTask(
+                manageConnectionsTask,
+                handleIncomingDataTask,
+                handleOutgoingDataTask,
+                sendDataTask
+        );
         consoleInputTask.run();
     }
 
@@ -102,6 +116,10 @@ public class Server {
         };
     }
 
+    private AbstractTask getHandleIncomingDataTask() {
+        // TODO
+    }
+
     private AbstractTask getSendDataTask() {
         return new AbstractTask(printUtil) {
             @Override
@@ -112,13 +130,23 @@ public class Server {
                             clientSockets.wait(); // sleep if we have no connections
                         }
                     }
-                    sendDataToClients();
+                    // receive data for the tick, process it, then send updates to clients
+                    if (!toReceiveQueue.isEmpty()) { // TODO
+                        receiveDataFromClients();
+                    }
+
+                    // TODO data processing here
+
+                    if (!toSendQueue.isEmpty()) {
+                        sendDataToClients();
+                    }
                 }
                 printUtil.printAndLog("Data transmission thread exiting");
             }
 
             private void sendDataToClients() throws InterruptedException {
-                Serializable toSend = toSendQueue.take(); // do this outside the client list lock, so we can accept new connections
+                Serializable toSend = toSendQueue.take(); // do this outside the client list lock, so we don't prevent it from acquiring the lock to get new connections
+                // TODO want to wait for input **OR** output, then wake up the thread -- have two threads feeding into two collections, each capable of waking up a main processing thread?
 
                 synchronized (lockClientSocketList) {
                     long intervalStart = System.currentTimeMillis();

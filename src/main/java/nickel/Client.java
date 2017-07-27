@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Scanner;
 
 import static nickel.net.Chunk.PACKET_LENGTH_INDEX;
 import static nickel.util.Constant.*;
@@ -89,7 +90,13 @@ public class Client {
         PrintUtil printUtil = new PrintUtil();
 
         try {
-            Socket clientSocket = new Socket("localhost", SERVER_PORT); // TODO allow specification of host
+            Scanner scanner = new Scanner(System.in);
+            printUtil.printAndLog("Enter a host address to connect (blank for localhost):");
+            String input = scanner.nextLine().trim().toLowerCase();
+            if (input.isEmpty()) {
+                input = "localhost";
+            }
+            Socket clientSocket = new Socket(input, SERVER_PORT); // TODO allow specification of port
             printUtil.printAndLog(String.format("Connected to server at %s", clientSocket.getInetAddress()));
             Client client = new Client(clientSocket, printUtil);
             client.start();
